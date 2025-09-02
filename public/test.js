@@ -1,0 +1,4 @@
+fetch('http://localhost:3001/api/data')
+  .then(res => res.json())
+  .then(data => console.log('Data from server:', data))
+  .catch(err => console.error('Error:', err));
