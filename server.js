@@ -43,7 +43,9 @@ app.get('/api/data', (req, res) => {
 app.post('/api/users', (req, res) => {
   const { error, value } = userSchema.validate(req.body);
   if (error) return res.status(400).json({ message: 'Invalid data', details: error.details });
-  res.status(201).json({ message: 'User created successfully!', data: value });
+  // Never send a password back to the client.
+  const { password, ...safeUser } = value;
+  res.status(201).json({ message: 'User created successfully!', data: safeUser });
 });
 
 // ให้หน้าแรกเสิร์ฟไฟล์แชท (public/index.html)
@@ -59,6 +61,8 @@ io.on('connection', (socket) => {
   console.log('A user connected:', socket.id);
 
   socket.on('chat message', (msg) => {
+    // Ignore anything that isn't a reasonable text message.
+    if (typeof msg !== 'string' || !msg.trim() || msg.length > 500) return;
     console.log('message:', msg);
     // ส่งให้ทุกคน
     io.emit('chat message', `[${socket.id.slice(0,6)}]: ${msg}`);
